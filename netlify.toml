@@ -1,0 +1,13 @@
+[build]
+command = "yarn build"
+publish = "dist"
+
+
+[dev]
+command = "yarn dev"
+
+[[redirects]]
+force = true
+from = "/*"
+status = 200
+to = "/index.html"
