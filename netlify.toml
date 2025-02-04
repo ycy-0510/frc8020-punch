@@ -7,7 +7,7 @@ publish = "dist"
 command = "yarn dev"
 
 [[redirects]]
-force = true
+force = false
 from = "/*"
 status = 200
 to = "/index.html"
