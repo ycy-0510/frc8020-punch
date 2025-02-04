@@ -133,9 +133,9 @@ const sortData = () => {
 const exportCsv = () => {
     //export to csv
     let csv = 'Name,Total Hours Worked,Total Missing Punches\n';
-    for (const [user, hours] of Object.entries(durationData.value)) {
-        console.log(user, hours, missingPunches.value[user]);
-        csv += `${realName[user]},${hours.toFixed(2)},${missingPunches.value[user] !== undefined ? missingPunches.value[user] : 0}\n`;
+    for (const user of users) {
+        console.log(user, durationData.value[user], missingPunches.value[user]);
+        csv += `${realName[user]},${durationData.value[user].toFixed(2)},${missingPunches.value[user] !== undefined ? missingPunches.value[user] : 0}\n`;
     }
     console.log(csv);
     const blob = new Blob([csv], { type: 'text/csv' });
