@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
+
+* {
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+textarea,
+input,
+select
+{
+    border-color: #cbd5e1!important;
+    border-width: 1.5px!important;
+    box-shadow:none!important;
+    outline: 0 none!important;
+}
+
+textarea:focus,
+input:focus,
+select:focus
+{
+    border-color: #38bdf8!important;
+    border-width: 1.5px!important;
+    box-shadow:none!important;
+    outline: 0 none!important;
+}
