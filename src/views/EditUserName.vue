@@ -14,6 +14,7 @@ import Swal from 'sweetalert2'
 
 const realName = reactive({})
 const punchData = ref({})
+const users = reactive([])
 
 onMounted(() => {
     //get data from local storage
@@ -34,6 +35,14 @@ onMounted(() => {
         }
     }
     console.log(realName.value)
+    //set usernames
+    for (const [key, value] of Object.entries(realName)) {
+        users.push(key)
+    }
+    //sort by username
+    users.sort((a, b) => {
+        return a.localeCompare(b)
+    })
 });
 
 
@@ -69,9 +78,9 @@ const saveAll = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(value,key) in realName" :key="key">
-                                <td>{{ key }}</td>
-                                <td><input type="text" v-model="realName[key]" class="form-control"></td>
+                            <tr v-for="user in users" :key="user">
+                                <td>{{ user }}</td>
+                                <td><input type="text" v-model="realName[user]" class="form-control"></td>
                             </tr>
                         </tbody>
                     </table>

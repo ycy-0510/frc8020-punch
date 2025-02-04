@@ -9,6 +9,10 @@ const punchData = ref({})
 const missingPunches = ref({})
 const durationData = ref({})
 const realName = reactive({})
+const users = reactive([])
+
+const sortIndex = ref(0)
+const sortAsc = ref(true)
 
 // {
 //     'userNume': {
@@ -84,11 +88,51 @@ onMounted(() => {
             realName[key] = key
         }
     }
+    //set usernames
+    for (const [key, value] of Object.entries(realName)) {
+        users.push(key)
+    }
+    //set missing punches
+    for (const [key, value] of Object.entries(realName)) {
+        if (!missingPunches.value[key]) {
+            missingPunches.value[key] = 0;
+        }
+    }
+    sortData();
 });
+
+const setSort = (index) => {
+    if (sortIndex.value === index) {
+        sortAsc.value = !sortAsc.value;
+    } else {
+        sortAsc.value = true;
+        sortIndex.value = index;
+    }
+    sortData();
+}
+
+const sortData = () => {
+    if (sortIndex.value === 0) {
+        users.sort((a, b) => {
+            return realName[a].localeCompare(realName[b])
+        })
+    } else if (sortIndex.value === 1) {
+        users.sort((a, b) => {
+            return durationData.value[a] - durationData.value[b]
+        })
+    } else if (sortIndex.value === 2) {
+        users.sort((a, b) => {
+            return missingPunches.value[a] - missingPunches.value[b]
+        })
+    }
+    if (!sortAsc.value) {
+        users.reverse();
+    }
+}
 
 const exportCsv = () => {
     //export to csv
-    let csv = 'User Name,Total Hours Worked,Total Missing Punches\n';
+    let csv = 'Name,Total Hours Worked,Total Missing Punches\n';
     for (const [user, hours] of Object.entries(durationData.value)) {
         console.log(user, hours, missingPunches.value[user]);
         csv += `${realName[user]},${hours.toFixed(2)},${missingPunches.value[user] !== undefined ? missingPunches.value[user] : 0}\n`;
@@ -112,15 +156,31 @@ const exportCsv = () => {
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th scope="col">User Name</th>
-                            <th scope="col">Total Hours Worked</th>
-                            <th scope="col">Total Missing Punches</th>
+                            <th scope="col"><a href="#" class="text-dark" @click="setSort(0)">Name
+                                    <font-awesome-icon icon="fa-solid fa-sort-up"
+                                        v-if="sortIndex == 0 && sortAsc == true" />
+                                    <font-awesome-icon icon="fa-solid fa-sort-down"
+                                        v-if="sortIndex == 0 && sortAsc == false" />
+                                </a>
+                            </th>
+                            <th scope="col"><a href="#" class="text-dark" @click="setSort(1)">Total Hours Worked
+                                    <font-awesome-icon icon="fa-solid fa-sort-up"
+                                        v-if="sortIndex == 1 && sortAsc == true" />
+                                    <font-awesome-icon icon="fa-solid fa-sort-down"
+                                        v-if="sortIndex == 1 && sortAsc == false" />
+                                </a></th>
+                            <th scope="col"><a href="#" class="text-dark" @click="setSort(2)">Total Missing Punches
+                                    <font-awesome-icon icon="fa-solid fa-sort-up"
+                                        v-if="sortIndex == 2 && sortAsc == true" />
+                                    <font-awesome-icon icon="fa-solid fa-sort-down"
+                                        v-if="sortIndex == 2 && sortAsc == false" />
+                                </a></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(hours, user) in durationData" :key="user">
+                        <tr v-for=" user in users" :key="user">
                             <td>{{ realName[user] }}</td>
-                            <td>{{ hours.toFixed(2) }}</td>
+                            <td>{{ durationData[user].toFixed(2) }}</td>
                             <td>{{ missingPunches[user] ? missingPunches[user] : 0 }}</td>
                         </tr>
                     </tbody>

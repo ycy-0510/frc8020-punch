@@ -114,14 +114,18 @@ const handleUpload = (event) => {
                     Swal.fire({
                         icon: 'success',
                         title: 'Upload Success',
-                        text: `Total ${count} records processed`
+                        text: `Total ${count} records processed`,
+                        showConfirmButton: false,
+                        timer: 1500
                     });
                 } catch (error) {
                     console.error(error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Upload Failed',
-                        text: 'Invalid file format'
+                        text: 'Invalid file format',
+                        showConfirmButton: false,
+                        timer: 1500
                     });
                     return;
                 }

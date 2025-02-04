@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive,computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import PageHeader from "../components/PageHeader.vue"
 import * as XLSX from 'xlsx'
 import { onMounted } from 'vue'
@@ -17,9 +17,19 @@ const addDate = () => {
         const date = new Date(newDate.value)
         const dateKey = date.toISOString().split('T')[0].replace(/-/g, '')
         console.log(dateKey)
-        editingdata.value[getUserName(selectedUser.value)][dateKey] = {
-            in: null,
-            out: null
+        if (!editingdata.value[selectedUser.value][dateKey]) {
+
+            editingdata.value[selectedUser.value][dateKey] = {
+                in: null,
+                out: null
+            }
+        }else{
+            Swal.fire({
+                icon: 'error',
+                title: 'Date already exists',
+                showConfirmButton: false,
+                timer: 1500
+            })
         }
     }
 }
@@ -44,6 +54,9 @@ const addDate = () => {
 // }
 
 onMounted(() => {
+    //set newDate to today
+    const today = new Date()
+    newDate.value = today.toISOString().split('T')[0]
     //get data from local storage
     const localDataP = localStorage.getItem('data')
     if (localDataP) {
@@ -64,14 +77,18 @@ onMounted(() => {
     }
     //set usernames
     for (const [key, value] of Object.entries(realName)) {
-        user.push(value)
+        user.push(key)
     }
+    //sort by realName
+    user.sort((a, b) => {
+        return realName[a].localeCompare(realName[b])
+    })
     editingdata.value = JSON.parse(JSON.stringify(punchData.value))
 });
 
 const save = (key) => {
-    const editedData = editingdata.value[getUserName(selectedUser.value)][key];
-    punchData.value[getUserName(selectedUser.value)][key] = editedData;
+    const editedData = editingdata.value[selectedUser.value][key];
+    punchData.value[selectedUser.value][key] = editedData;
     saveData();
     editingdata.value = JSON.parse(JSON.stringify(punchData.value))
 }
@@ -82,8 +99,8 @@ const saveData = () => {
 }
 
 const saveAll = () => {
-    const editedData = editingdata.value[getUserName(selectedUser.value)];
-    punchData.value[getUserName(selectedUser.value)] = editedData;
+    const editedData = editingdata.value[selectedUser.value];
+    punchData.value[selectedUser.value] = editedData;
     saveData();
     editingdata.value = JSON.parse(JSON.stringify(punchData.value))
     Swal.fire({
@@ -93,20 +110,6 @@ const saveAll = () => {
         timer: 1500
     })
 }
-
-const getUserName = (name) => {
-    //find username by realName
-    for (const [key, value] of Object.entries(realName)) {
-        if (value == name) {
-            return key;
-        }
-    }
-    return '';
-};
-
-const computedUser = computed(() => {
-    return getUserName(selectedUser.value);
-});
 </script>
 
 <template>
@@ -120,7 +123,7 @@ const computedUser = computed(() => {
                     <select id="username" v-model="selectedUser" class="form-control">
                         <option value="" disabled selected :value="''">Select a username</option>
                         <option v-for="username in user" :key="username" :value="username">
-                            {{ username }}
+                            {{ realName[username] }} ({{ username }})
                         </option>
                     </select>
                 </div>
@@ -141,7 +144,7 @@ const computedUser = computed(() => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(value, key) in editingdata[computedUser]" :key="key">
+                            <tr v-for="(value, key) in editingdata[selectedUser]" :key="key">
                                 <td>{{ key }}</td>
                                 <td><input type="time" v-model="value.in" class="form-control" /></td>
                                 <td><input type="time" v-model="value.out" class="form-control" /></td>

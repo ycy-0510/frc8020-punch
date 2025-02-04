@@ -21,6 +21,11 @@ const routes = [
         name: 'Edit Name'
     },
     {
+        path: '/data',
+        component: () => import('../views/Data.vue'),
+        name: 'Data Management'
+    },
+    {
         path: '/:pathMatch(.*)*',
         redirect: '/'
     }

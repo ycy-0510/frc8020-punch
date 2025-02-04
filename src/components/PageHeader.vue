@@ -28,6 +28,9 @@ import { onMounted, ref } from "vue"
                     <li class="nav-item">
                         <RouterLink to="/edit" class="nav-link" active-class="active">Edit</RouterLink>
                     </li>
+                    <li class="nav-item">
+                        <RouterLink to="/data" class="nav-link" active-class="active">Data</RouterLink>
+                    </li>
                 </ul>
             </div>
         </div>
