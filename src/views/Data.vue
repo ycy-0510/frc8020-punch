@@ -83,7 +83,7 @@ onMounted(async () => {
             if (result.isConfirmed) {
                 //get data from link
                 const partoflink = urlParams.get('import')
-                const link = 'https://www.dropbox.com/scl/fi/' + partoflink.replace('//q', '?').replace('//a', '&') + '&dl=1'
+                const link = 'https://script.google.com/macros/s/AKfycbyzSJWZG0z9ecjvLWpfM0dSLjWFQUR-TpctctlCUt54ZyBG0EWC5X7XbL1h521SmynV/exec?url=https://dl.dropbox.com/scl/fi/' + partoflink.replace('//q', '?').replace('//a', '&') + '&dl=0'
                 Swal.fire({
                     title: 'Importing Data',
                     text: 'Please wait...',
@@ -109,7 +109,7 @@ onMounted(async () => {
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
-                        location.reload();
+                        location.replace('/')
                     })
                 }).catch(error => {
                     Swal.fire({
