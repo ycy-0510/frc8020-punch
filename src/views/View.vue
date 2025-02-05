@@ -142,20 +142,16 @@ const sortData = () => {
     }
 }
 
-const exportCsv = () => {
-    //export to csv
-    let csv = 'Name,Total Hours Worked,Total Missing Punches\n';
-    for (const user of users) {
-        console.log(user, durationData.value[user], missingPunches.value[user]);
-        csv += `${realName[user]},${durationData.value[user].toFixed(2)},${missingPunches.value[user] !== undefined ? missingPunches.value[user] : 0}\n`;
-    }
-    console.log(csv);
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'report.csv';
-    a.click();
+const exportXlsx = () => {
+    const ws = XLSX.utils.json_to_sheet(users.map(user => ({
+        Name: realName[user],
+        'Total Hours Worked': durationData.value[user].toFixed(2),
+        'Total Missing Punches': missingPunches.value[user] !== undefined ? missingPunches.value[user] : 0
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Report');
+    const datetime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[-:]/g, '');
+    XLSX.writeFile(wb, `Report-${datetime}.xlsx`);
 }
 
 const handleTitleClick = () => clickCount.value++;
@@ -210,7 +206,7 @@ const handleTitleClick = () => clickCount.value++;
                         </tr>
                     </tbody>
                 </table>
-                <button class="btn btn-primary my-3" @click="exportCsv">Export</button>
+                <button class="btn btn-primary my-3" @click="exportXlsx">Export</button>
             </div>
         </div>
     </div>
