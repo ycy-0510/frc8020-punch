@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue';
 import PageHeader from "../components/PageHeader.vue"
 import { onMounted } from 'vue'
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
 
 
 const userNameReplace = ref({})
@@ -10,6 +11,7 @@ const punchData = ref({})
 const realName = reactive({})
 const localQuota = ref(0)
 const localUsage = ref(0)
+const users = reactive([])
 
 
 // {
@@ -50,6 +52,15 @@ onMounted(async () => {
         userNameReplace.value = JSON.parse(localDataU)
     }
 
+    //set usernames
+    for (const [key, value] of Object.entries(realName)) {
+        users.push(key)
+    }
+    //sort by realName
+    users.sort((a, b) => {
+        return realName[a].localeCompare(realName[b])
+    })
+
     //get local storage usage
     const localDataSize = new Blob([JSON.stringify(punchData.value)]).size + new Blob([JSON.stringify(realName)]).size + new Blob([JSON.stringify(localQuota.value)]).size + new Blob([JSON.stringify(userNameReplace.value)]).size
     localQuota.value = 5 * 1024 * 1024
@@ -72,14 +83,14 @@ const exportAll = async () => {
         punchData: punchData.value,
         realName: realName,
         userNameReplace: userNameReplace.value
-        }
-        //hash with sha256
-        const hash = await hashWithSHA256(JSON.stringify(data))
-        data.hash = hash
-        const json = JSON.stringify(data)
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const datetime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[-:]/g, '');
+    }
+    //hash with sha256
+    const hash = await hashWithSHA256(JSON.stringify(data))
+    data.hash = hash
+    const json = JSON.stringify(data)
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const datetime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[-:]/g, '');
     const a = document.createElement('a');
     a.href = url;
     a.download = `FRC8020PunchData-${datetime}.cpd`;
@@ -148,6 +159,28 @@ const importAll = () => {
     }
     input.click();
 }
+
+const exportPunch = () => {
+    const data = [];
+
+    for (const user of users) {
+        const dates = punchData.value[user];
+        for (const [date, times] of Object.entries(dates)) {
+            data.push({
+                User: realName[user] || user,
+                Date: date,
+                In: times.in,
+                Out: times.out
+            });
+        }
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'PunchData');
+    const datetime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[-:]/g, '');
+    XLSX.writeFile(workbook, `PunchData-${datetime}.xlsx`);
+};
 </script>
 
 <template>
@@ -158,7 +191,7 @@ const importAll = () => {
                 <h2>Data Manage</h2>
                 <div class="row py-4">
                     <div class="col-12 col-md-6 pb-2">
-                        <div class="card">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <h4>Export Data</h4>
                                 <p>Export data to backup.</p>
@@ -167,7 +200,7 @@ const importAll = () => {
                         </div>
                     </div>
                     <div class="col-12 col-md-6 pb-2">
-                        <div class="card">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <h4>Import Data</h4>
                                 <p>Import data from recover data.</p>
@@ -176,7 +209,7 @@ const importAll = () => {
                         </div>
                     </div>
                     <div class="col-12 col-md-6 pb-2">
-                        <div class="card">
+                        <div class="card h-100">
                             <div class="card-body">
                                 <h4>Local Data Usage</h4>
                                 <p> Local Data usage of the browser.</p>
@@ -187,6 +220,15 @@ const importAll = () => {
                                     </div>
                                 </div>
                                 <p>{{ (localUsage / 1024 / 1024).toFixed(2) }}MB / {{ localQuota / 1024 / 1024 }}MB</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 pb-2">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h4>Export All Punch Data</h4>
+                                <p>Export all punch data share</p>
+                                <button class="btn btn-primary w-100" @click="exportPunch">Export</button>
                             </div>
                         </div>
                     </div>
