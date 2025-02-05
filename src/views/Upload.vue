@@ -7,6 +7,8 @@ import Swal from 'sweetalert2'
 
 const punchData = ref({})
 
+const userNameReplace = ref({})
+
 // {
 //     'userNume': {
 //         "20250125":{
@@ -27,10 +29,15 @@ onMounted(() => {
         punchData.value = JSON.parse(localData)
     }
     console.log(punchData.value)
+    const localDataU = localStorage.getItem('userNameReplace')
+    if (localDataU) {
+        userNameReplace.value = JSON.parse(localDataU)
+    }
 });
 
 const saveData = () => {
     localStorage.setItem('data', JSON.stringify(punchData.value))
+    //save to IndexedDB with idb
     console.log(punchData.value)
 }
 
@@ -73,6 +80,11 @@ const handleUpload = (event) => {
                             //if B column is out, set out time
                             //if B column is null, do nothing
                             //date is row[0] iso date
+                            if(row[2]){
+                                if(userNameReplace.value[row[2]]){
+                                    row[2] = userNameReplace.value[row[2]]
+                                }
+                            }
                             const date = row[0].toISOString().split('T')[0].replace(/-/g, '')
                             const time = row[0].toISOString().split('T')[1].substring(0, 5)
                             if (row[1] === 'In') {

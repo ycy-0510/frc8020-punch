@@ -2,10 +2,14 @@
 import { ref, reactive } from 'vue';
 import PageHeader from "../components/PageHeader.vue"
 import { onMounted } from 'vue'
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 
+
+const userNameReplace = ref({})
 const punchData = ref({})
 const realName = reactive({})
+const localQuota = ref(0)
+const localUsage = ref(0)
 
 
 // {
@@ -21,7 +25,7 @@ const realName = reactive({})
 //     }
 // }
 
-onMounted(() => {
+onMounted(async () => {
     //get data from local storage
     const localDataP = localStorage.getItem('data')
     if (localDataP) {
@@ -40,8 +44,17 @@ onMounted(() => {
             realName[key] = key
         }
     }
-    //set usernames
 
+    const localDataU = localStorage.getItem('userNameReplace')
+    if (localDataU) {
+        userNameReplace.value = JSON.parse(localDataU)
+    }
+
+    //get local storage usage
+    const localDataSize = new Blob([JSON.stringify(punchData.value)]).size + new Blob([JSON.stringify(realName)]).size + new Blob([JSON.stringify(localQuota.value)]).size + new Blob([JSON.stringify(userNameReplace.value)]).size
+    localQuota.value = 5 * 1024 * 1024
+    localUsage.value = localDataSize
+    console.log(localDataSize)
 });
 
 const hashWithSHA256 = async (message) => {
@@ -57,24 +70,26 @@ const exportAll = async () => {
     const data = {
         header: 'FRC8020PunchData',
         punchData: punchData.value,
-        realName: realName
-    }
-    //hash with sha256
-    const hash = await hashWithSHA256(JSON.stringify(data))
-    data.hash = hash
-    const json = JSON.stringify(data)
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+        realName: realName,
+        userNameReplace: userNameReplace.value
+        }
+        //hash with sha256
+        const hash = await hashWithSHA256(JSON.stringify(data))
+        data.hash = hash
+        const json = JSON.stringify(data)
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const datetime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[-:]/g, '');
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'FRC8020PunchData.cpd';
+    a.download = `FRC8020PunchData-${datetime}.cpd`;
     a.click();
 }
 
 const importAll = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.cpd';
+    input.accept = '.cpd,.cpd.json';
     input.onchange = (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
@@ -98,8 +113,12 @@ const importAll = () => {
                         if (result.isConfirmed) {
                             const newpunchData = data.punchData
                             const newrealName = data.realName
+                            const newuserNameReplace = data.userNameReplace
                             localStorage.setItem('data', JSON.stringify(newpunchData))
                             localStorage.setItem('realName', JSON.stringify(newrealName))
+                            if (newuserNameReplace) {
+                                localStorage.setItem('userNameReplace', JSON.stringify(newuserNameReplace))
+                            }
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Imported',
@@ -129,7 +148,6 @@ const importAll = () => {
     }
     input.click();
 }
-
 </script>
 
 <template>
@@ -139,7 +157,7 @@ const importAll = () => {
             <div class="col-12 col-lg-9 pt-4">
                 <h2>Data Manage</h2>
                 <div class="row py-4">
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-6 pb-2">
                         <div class="card">
                             <div class="card-body">
                                 <h4>Export Data</h4>
@@ -148,12 +166,27 @@ const importAll = () => {
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-6 pb-2">
                         <div class="card">
                             <div class="card-body">
                                 <h4>Import Data</h4>
                                 <p>Import data from recover data.</p>
                                 <button class="btn btn-danger w-100" @click="importAll">Import All</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 pb-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>Local Data Usage</h4>
+                                <p> Local Data usage of the browser.</p>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar"
+                                        :style="{ width: `${localUsage / localQuota * 100}%` }" aria-valuenow="25"
+                                        aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <p>{{ (localUsage / 1024 / 1024).toFixed(2) }}MB / {{ localQuota / 1024 / 1024 }}MB</p>
                             </div>
                         </div>
                     </div>

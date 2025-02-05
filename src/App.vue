@@ -6,7 +6,7 @@ import router from "./router"
 import Swal from "sweetalert2"
 
 router.afterEach((to, from, failure) => {
-  document.title = `${to.name} | FRC 8020 Punch`
+  document.title = `${to.name} | FRC 8020 Punch In`
 })
 
 </script>

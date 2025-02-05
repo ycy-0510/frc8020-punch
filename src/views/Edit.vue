@@ -23,7 +23,7 @@ const addDate = () => {
                 in: null,
                 out: null
             }
-        }else{
+        } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Date already exists',
@@ -86,13 +86,6 @@ onMounted(() => {
     editingdata.value = JSON.parse(JSON.stringify(punchData.value))
 });
 
-const save = (key) => {
-    const editedData = editingdata.value[selectedUser.value][key];
-    punchData.value[selectedUser.value][key] = editedData;
-    saveData();
-    editingdata.value = JSON.parse(JSON.stringify(punchData.value))
-}
-
 const saveData = () => {
     localStorage.setItem('data', JSON.stringify(punchData.value))
     console.log(punchData.value)
@@ -108,6 +101,30 @@ const saveAll = () => {
         title: 'Saved',
         showConfirmButton: false,
         timer: 1500
+    })
+}
+
+const removeData = (key) => {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            delete editingdata.value[selectedUser.value][key];
+            Swal.fire(
+                {
+                    icon: 'success',
+                    title: 'Deleted',
+                    showConfirmButton: false,
+                    timer: 1500
+                }
+            )
+        }
     })
 }
 </script>
@@ -148,7 +165,7 @@ const saveAll = () => {
                                 <td>{{ key }}</td>
                                 <td><input type="time" v-model="value.in" class="form-control" /></td>
                                 <td><input type="time" v-model="value.out" class="form-control" /></td>
-                                <td><button class="btn btn-primary" @click="save(key)">Save</button></td>
+                                <td><button class="btn btn-danger" @click="removeData(key)">Clear</button></td>
                             </tr>
                         </tbody>
                     </table>
