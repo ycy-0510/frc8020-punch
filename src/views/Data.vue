@@ -109,19 +109,22 @@ onMounted(async () => {
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
-                        location.replace('/')
+                        location.replace('/view')
                     })
                 }).catch(error => {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
                         text: 'Failed to import data',
+                        showConfirmButton: false,
+                        timer: 1500
                     });
                     console.error('Error fetching data:', error);
+                    router.replace('/view')
                 });
 
             } else {
-                router.replace('/')
+                router.replace('/view')
             }
         })
     }
