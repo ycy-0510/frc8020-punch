@@ -6,7 +6,9 @@ import { onMounted } from 'vue'
 import Swal from 'sweetalert2'
 
 const punchData = ref({})
-const missingPunches = ref({})
+const missingPunchesIn = ref({})
+const missingPunchesOut = ref({})
+const missingDay = ref({})
 const durationData = ref({})
 const realName = reactive({})
 const users = reactive([])
@@ -68,15 +70,23 @@ onMounted(() => {
                 }
             } else {
                 console.log('missing punch')
-                if (!missingPunches.value[key]) {
-                    missingPunches.value[key] = 0;
+                if(!missingPunchesIn.value[key]){
+                    missingPunchesIn.value[key] = 0;
                 }
-                if (time.in || time.out) {
+                if(!missingPunchesOut.value[key]){
+                    missingPunchesOut.value[key] = 0;
+                }
+                if(!missingDay.value[key]){
+                    missingDay.value[key] = 0;
+                }
+                if (!time.in && !time.out) {
+                    missingDay.value[key]++;
+                } else {
                     if (!time.in) {
-                        missingPunches.value[key] = missingPunches.value[key] + 1;
+                        missingPunchesIn.value[key]++;
                     }
                     if (!time.out) {
-                        missingPunches.value[key] = missingPunches.value[key] + 1;
+                        missingPunchesOut.value[key]++;
                     }
                 }
             }
@@ -104,10 +114,16 @@ onMounted(() => {
     for (const [key, value] of Object.entries(realName)) {
         users.push(key)
     }
-    //set missing punches
-    for (const [key, value] of Object.entries(realName)) {
-        if (!missingPunches.value[key]) {
-            missingPunches.value[key] = 0;
+    //set missingPunches
+    for (const user of users) {
+        if (!missingPunchesIn.value[user]) {
+            missingPunchesIn.value[user] = 0;
+        }
+        if (!missingPunchesOut.value[user]) {
+            missingPunchesOut.value[user] = 0;
+        }
+        if (!missingDay.value[user]) {
+            missingDay.value[user] = 0;
         }
     }
     sortData();
@@ -134,7 +150,15 @@ const sortData = () => {
         })
     } else if (sortIndex.value === 2) {
         users.sort((a, b) => {
-            return missingPunches.value[a] - missingPunches.value[b]
+            return missingPunchesIn.value[a] - missingPunchesIn.value[b]
+        })
+    } else if (sortIndex.value === 3) {
+        users.sort((a, b) => {
+            return missingPunchesOut.value[a] - missingPunchesOut.value[b]
+        })
+    } else if (sortIndex.value === 4) {
+        users.sort((a, b) => {
+            return missingDay.value[a] - missingDay.value[b]
         })
     }
     if (!sortAsc.value) {
@@ -146,7 +170,9 @@ const exportXlsx = () => {
     const ws = XLSX.utils.json_to_sheet(users.map(user => ({
         Name: realName[user],
         'Total Hours Worked': durationData.value[user].toFixed(2),
-        'Total Missing Punches': missingPunches.value[user] !== undefined ? missingPunches.value[user] : 0
+        'Total Missing Punches In': missingPunchesIn.value[user] !== undefined ? missingPunchesIn.value[user] : 0,
+        'Total Missing Punches Out': missingPunchesOut.value[user] !== undefined ? missingPunchesOut.value[user] : 0,
+        'Total Missing Day': missingDay.value[user] !== undefined ? missingDay.value[user] : 0,
     })));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Report');
@@ -189,11 +215,23 @@ const handleTitleClick = () => clickCount.value++;
                                     <font-awesome-icon icon="fa-solid fa-sort-down"
                                         v-if="sortIndex == 1 && sortAsc == false" />
                                 </a></th>
-                            <th scope="col"><a href="#" class="text-dark" @click="setSort(2)">Total Missing Punches
+                            <th scope="col"><a href="#" class="text-dark" @click="setSort(2)">Total Missing Punch In
                                     <font-awesome-icon icon="fa-solid fa-sort-up"
                                         v-if="sortIndex == 2 && sortAsc == true" />
                                     <font-awesome-icon icon="fa-solid fa-sort-down"
                                         v-if="sortIndex == 2 && sortAsc == false" />
+                                </a></th>
+                            <th scope="col"><a href="#" class="text-dark" @click="setSort(3)">Total Missing Punch Out
+                                    <font-awesome-icon icon="fa-solid fa-sort-up"
+                                        v-if="sortIndex == 3 && sortAsc == true" />
+                                    <font-awesome-icon icon="fa-solid fa-sort-down"
+                                        v-if="sortIndex == 3 && sortAsc == false" />
+                                </a></th>
+                            <th scope="col"><a href="#" class="text-dark" @click="setSort(4)">Total Missing Day
+                                    <font-awesome-icon icon="fa-solid fa-sort-up"
+                                        v-if="sortIndex == 4 && sortAsc == true" />
+                                    <font-awesome-icon icon="fa-solid fa-sort-down"
+                                        v-if="sortIndex == 4 && sortAsc == false" />
                                 </a></th>
                         </tr>
                     </thead>
@@ -202,7 +240,9 @@ const handleTitleClick = () => clickCount.value++;
                             :class="{ 'table-danger': durationData[user] / maxHours < compareRate && clickCount == 5 }">
                             <td>{{ realName[user] }}</td>
                             <td>{{ durationData[user].toFixed(2) }}</td>
-                            <td>{{ missingPunches[user] ? missingPunches[user] : 0 }}</td>
+                            <td>{{ missingPunchesIn[user] ? missingPunchesIn[user] : 0 }}</td>
+                            <td>{{ missingPunchesOut[user] ? missingPunchesOut[user] : 0 }}</td>
+                            <td>{{ missingDay[user] ? missingDay[user] : 0 }}</td>
                         </tr>
                     </tbody>
                 </table>

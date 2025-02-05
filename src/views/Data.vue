@@ -4,6 +4,7 @@ import PageHeader from "../components/PageHeader.vue"
 import { onMounted } from 'vue'
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
+import router from '../router';
 
 
 const userNameReplace = ref({})
@@ -12,7 +13,7 @@ const realName = reactive({})
 const localQuota = ref(0)
 const localUsage = ref(0)
 const users = reactive([])
-
+const dropboxLink = ref('')
 
 // {
 //     'userNume': {
@@ -66,6 +67,64 @@ onMounted(async () => {
     localQuota.value = 5 * 1024 * 1024
     localUsage.value = localDataSize
     console.log(localDataSize)
+
+    let urlParams = new URLSearchParams(window.location.search);
+    console.log(urlParams.has('import'));
+    if (urlParams.has('import')) {
+        Swal.fire({
+            title: 'Import Data',
+            text: "Do you want to import data from the link?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, import it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                //get data from link
+                const partoflink = urlParams.get('import')
+                const link = 'https://www.dropbox.com/scl/fi/' + partoflink.replace('//q', '?').replace('//a', '&') + '&dl=1'
+                Swal.fire({
+                    title: 'Importing Data',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
+
+                fetch(link).then(response => response.json()).then(data => {
+                    console.log(data)
+                    const newpunchData = data.punchData
+                    const newrealName = data.realName
+                    const newuserNameReplace = data.userNameReplace
+                    localStorage.setItem('data', JSON.stringify(newpunchData))
+                    localStorage.setItem('realName', JSON.stringify(newrealName))
+                    if (newuserNameReplace) {
+                        localStorage.setItem('userNameReplace', JSON.stringify(newuserNameReplace))
+                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Imported',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        location.reload();
+                    })
+                }).catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to import data',
+                    });
+                    console.error('Error fetching data:', error);
+                });
+
+            } else {
+                router.replace('/')
+            }
+        })
+    }
 });
 
 const hashWithSHA256 = async (message) => {
@@ -181,6 +240,31 @@ const exportPunch = () => {
     const datetime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[-:]/g, '');
     XLSX.writeFile(workbook, `PunchData-${datetime}.xlsx`);
 };
+
+const shareWithLink = () => {
+    const link = dropboxLink.value
+    if (link && link.includes('dropbox.com') && link.endsWith('&dl=0') && link.includes('scl/fi/') && link.includes('.cpd')) {
+        const sharedLinkP = link.replace('https://www.dropbox.com/scl/fi/', '').replace('&dl=0', '').replace('?', '//q').replace('&', '//a');
+        const shareUrl = window.location.origin + '/data?import=' + sharedLinkP
+        console.log(shareUrl)
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Link Copied',
+                showConfirmButton: false,
+                timer: 2500
+            });
+        });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Link',
+            text: 'Please provide a valid Dropbox link',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }
+} 
 </script>
 
 <template>
@@ -220,6 +304,19 @@ const exportPunch = () => {
                                     </div>
                                 </div>
                                 <p>{{ (localUsage / 1024 / 1024).toFixed(2) }}MB / {{ localQuota / 1024 / 1024 }}MB</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 pb-2">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h4>How to share data with link</h4>
+                                <p>Upload to Dropbox and paste the link here.</p>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Dropbox Link"
+                                        v-model="dropboxLink">
+                                    <button class="btn btn-primary" @click="shareWithLink">Share</button>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -7,7 +7,7 @@ import { onMounted, ref } from "vue"
     <nav class="navbar sticky-top navbar-expand-lg bg-white border-bottom d-print-none">
         <div class="container-fluid">
             <a class="navbar-brand">
-                FRC8020 Punch
+                FRC8020 Punch In/out
             </a>
             <div class="mx-auto"></div>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
