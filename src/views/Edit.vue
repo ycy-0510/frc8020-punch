@@ -11,6 +11,12 @@ const editingdata = ref({})
 const realName = reactive({})
 const user = reactive([])
 
+const allUsersDate = ref([])
+// [
+//     '20250103',
+//     '20250104',
+// ]
+
 const newDate = ref('')
 const addDate = () => {
     if (newDate.value) {
@@ -127,6 +133,93 @@ const removeData = (key) => {
         }
     })
 }
+
+const getAllUsersDate = () => {
+    if (selectedUser.value !== 'all') {
+        return
+    }
+    allUsersDate.value = []
+    for (const [key, value] of Object.entries(punchData.value)) {
+        for (const date of Object.keys(value)) {
+            if (!allUsersDate.value.includes(date)) {
+                allUsersDate.value.push(date)
+            }
+        }
+    }
+    allUsersDate.value.sort()
+    console.log(allUsersDate.value)
+}
+
+const addDatetoAll = () => {
+    if (newDate.value) {
+        const date = new Date(newDate.value)
+        const dateKey = date.toISOString().split('T')[0].replace(/-/g, '')
+        if(!allUsersDate.value.includes(dateKey)){
+            allUsersDate.value.push(dateKey)
+            allUsersDate.value.sort()
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Date already exists',
+                showConfirmButton: false,
+                timer: 1500
+            })
+        }
+    }
+}
+
+const removeDatatoAll = (date) => {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `You are deleting ${date}.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            allUsersDate.value = allUsersDate.value.filter((value) => value !== date)
+            Swal.fire(
+                {
+                    icon: 'success',
+                    title: 'Deleted',
+                    showConfirmButton: false,
+                    timer: 1500
+                }
+            )
+        }
+    })
+}
+
+const saveAlltoAll = () => {
+    let deleteCount = 0;
+    let addCount = 0;
+    for (const [key, value] of Object.entries(punchData.value)) {
+        for (const date of allUsersDate.value) {
+            if (!value[date]) {
+                value[date] = {
+                    in: null,
+                    out: null
+                }
+                addCount++;
+            }
+        }
+        for (const date of Object.keys(value)) {
+            if (!allUsersDate.value.includes(date)) {
+                delete value[date]
+                deleteCount++;
+            }
+        }
+    }
+    saveData()
+    editingdata.value = JSON.parse(JSON.stringify(punchData.value))
+    Swal.fire({
+        icon: 'success',
+        title: 'Saved',
+        text: `Added ${addCount} and deleted ${deleteCount} dates`,
+    })
+}
 </script>
 
 <template>
@@ -137,14 +230,15 @@ const removeData = (key) => {
                 <h2>Edit</h2>
                 <div class="form-group py-3">
                     <label for="username">Select Username:</label>
-                    <select id="username" v-model="selectedUser" class="form-control">
+                    <select id="username" v-model="selectedUser" class="form-control" @change="getAllUsersDate">
                         <option value="" disabled selected :value="''">Select a username</option>
                         <option v-for="username in user" :key="username" :value="username">
                             {{ realName[username] }} ({{ username }})
                         </option>
+                        <option value="all">All</option>
                     </select>
                 </div>
-                <div v-if="selectedUser != ''">
+                <div v-if="selectedUser != '' && selectedUser != 'all'">
                     <!-- add date  -->
                     <div class="form-group py-3">
                         <label for="newDate">Add Date:</label>
@@ -171,6 +265,29 @@ const removeData = (key) => {
                         </tbody>
                     </table>
                     <button class="btn btn-primary my-3" @click="saveAll">Save All</button>
+                </div>
+                <div v-else-if="selectedUser == 'all'">
+                    <!-- add date  -->
+                    <div class="form-group py-3">
+                        <label for="newDate">Add Date:</label>
+                        <input type="date" id="newDate" v-model="newDate" class="form-control" />
+                        <button class="btn btn-primary mt-2" @click="addDatetoAll">Add Date</button>
+                    </div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="date in allUsersDate" :key="date">
+                                <td>{{ date }}</td>
+                                <td><button class="btn btn-danger" @click="removeDatatoAll(date)">Remove</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-primary my-3" @click="saveAlltoAll">Save All</button>
                 </div>
             </div>
         </div>
