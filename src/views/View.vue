@@ -10,9 +10,13 @@ const missingPunches = ref({})
 const durationData = ref({})
 const realName = reactive({})
 const users = reactive([])
+const maxHours = ref(0)
+const compareRate = ref(0.25)
 
 const sortIndex = ref(0)
 const sortAsc = ref(true)
+
+const clickCount = ref(0)
 
 // {
 //     'userNume': {
@@ -64,15 +68,23 @@ onMounted(() => {
                 }
             } else {
                 console.log('missing punch')
-                if (!time.in) {
-                    missingPunches.value[key] = missingPunches.value[key] ? missingPunches.value[key] + 1 : 1;
+                if (!missingPunches.value[key]) {
+                    missingPunches.value[key] = 0;
                 }
-                if (!time.out) {
-                    missingPunches.value[key] = missingPunches.value[key] ? missingPunches.value[key] + 1 : 1;
+                if (time.in || time.out) {
+                    if (!time.in) {
+                        missingPunches.value[key] = missingPunches.value[key] + 1;
+                    }
+                    if (!time.out) {
+                        missingPunches.value[key] = missingPunches.value[key] + 1;
+                    }
                 }
             }
         }
         durationData.value[key] = total;
+        if (total > maxHours.value) {
+            maxHours.value = total;
+        }
     }
     console.log(durationData.value);
 
@@ -145,6 +157,8 @@ const exportCsv = () => {
     a.download = 'report.csv';
     a.click();
 }
+
+const handleTitleClick = () => clickCount.value++;
 </script>
 
 <template>
@@ -152,7 +166,17 @@ const exportCsv = () => {
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-9 pt-4">
-                <h2>View</h2>
+                <h2><a @click="handleTitleClick" href='#' class="text-dark text-decoration-none"> View</a></h2>
+                <div class="card mb-3" v-if="clickCount == 5">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="compareRate" class="form-label">Compare Rate: </label>
+                            <input type="range" class="form-range" id="compareRate" v-model="compareRate" min="0"
+                                max="1" step="0.01" @mousedown="isSliding = true" @mouseup="isSliding = false">
+                            <span>{{ (compareRate * 100).toFixed(0) }}%</span>
+                        </div>
+                    </div>
+                </div>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -178,7 +202,8 @@ const exportCsv = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for=" user in users" :key="user">
+                        <tr v-for=" user in users" :key="user"
+                            :class="{ 'table-danger': durationData[user] / maxHours < compareRate && clickCount == 5 }">
                             <td>{{ realName[user] }}</td>
                             <td>{{ durationData[user].toFixed(2) }}</td>
                             <td>{{ missingPunches[user] ? missingPunches[user] : 0 }}</td>

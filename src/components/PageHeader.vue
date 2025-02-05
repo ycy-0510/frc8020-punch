@@ -31,6 +31,9 @@ import { onMounted, ref } from "vue"
                     <li class="nav-item">
                         <RouterLink to="/data" class="nav-link" active-class="active">Data</RouterLink>
                     </li>
+                    <li class="nav-item">
+                        <a href="https://github.com/ycy-0510/frc8020-punch" class="nav-link" target="_blank">Open Source</a>
+                    </li>
                 </ul>
             </div>
         </div>

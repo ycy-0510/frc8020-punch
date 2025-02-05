@@ -107,7 +107,7 @@ const saveAll = () => {
 const removeData = (key) => {
     Swal.fire({
         title: 'Are you sure?',
-        text: "You won't be able to revert this!",
+        text: `You are deleting ${key}.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -161,7 +161,8 @@ const removeData = (key) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(value, key) in editingdata[selectedUser]" :key="key">
+                            <tr v-for="(value, key) in editingdata[selectedUser]" :key="key"
+                                :class="{ 'table-warning': (!value.in || !value.out) && !(!value.in && !value.out), 'table-secondary': !value.in && !value.out, }">
                                 <td>{{ key }}</td>
                                 <td><input type="time" v-model="value.in" class="form-control" /></td>
                                 <td><input type="time" v-model="value.out" class="form-control" /></td>

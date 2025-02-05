@@ -10,7 +10,9 @@ const version = APP_VERSION
                 <div class="col-12 col-md-8">
                     <p class="text-center">
                         <span>
-                            &COPY; 2025 YCY
+                            &copy; 2025 YCY licensed under <a href="https://frc8020punch.netlify.app/LICENSE"
+                                target="_blank">MIT</a> license
+                            <br>Ver. {{ version }}
                         </span>
                     </p>
                 </div>
