@@ -6,17 +6,22 @@ const routes = [
         name: 'Upload'
     },
     {
-        path: '/view',
+        path: '/dashboard',
         component: () => import('../views/View.vue'),
-        name: 'View'
+        name: 'Dashboard'
     },
     {
-        path: '/edit',
-        component: () => import('../views/Edit.vue'),
-        name: 'Edit'
+        path: '/editbyname',
+        component: () => import('../views/EditByName.vue'),
+        name: 'Edit By Name'
     },
     {
-        path: '/edit-name',
+        path: '/editbydate',
+        component: () => import('../views/EditByDate.vue'),
+        name: 'Edit By Date'
+    },
+    {
+        path: '/username',
         component: () => import('../views/EditUserName.vue'),
         name: 'Edit Name'
     },

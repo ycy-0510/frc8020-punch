@@ -109,7 +109,7 @@ onMounted(async () => {
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
-                        location.replace('/view')
+                        location.replace('/dashboard')
                     })
                 }).catch(error => {
                     Swal.fire({
@@ -120,7 +120,7 @@ onMounted(async () => {
                         timer: 1500
                     });
                     console.error('Error fetching data:', error);
-                    router.replace('/view')
+                    router.replace('/dashboard')
                 });
 
             } else {

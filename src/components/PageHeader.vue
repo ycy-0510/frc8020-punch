@@ -20,16 +20,19 @@ import { onMounted, ref } from "vue"
                         <RouterLink to="/" class="nav-link" active-class="active">Upload</RouterLink>
                     </li>
                     <li class="nav-item">
-                        <RouterLink to="/view" class="nav-link" active-class="active">View</RouterLink>
+                        <RouterLink to="/dashboard" class="nav-link" active-class="active">Dashboard</RouterLink>
                     </li>
                     <li class="nav-item">
-                        <RouterLink to="/edit-name" class="nav-link" active-class="active">Edit Name</RouterLink>
+                        <RouterLink to="/editbyname" class="nav-link" active-class="active">Edit (name)</RouterLink>
                     </li>
                     <li class="nav-item">
-                        <RouterLink to="/edit" class="nav-link" active-class="active">Edit</RouterLink>
+                        <RouterLink to="/editbydate" class="nav-link" active-class="active">Edit (date)</RouterLink>
                     </li>
                     <li class="nav-item">
-                        <RouterLink to="/data" class="nav-link" active-class="active">Data</RouterLink>
+                        <RouterLink to="/username" class="nav-link" active-class="active">User Name</RouterLink>
+                    </li>
+                    <li class="nav-item">
+                        <RouterLink to="/data" class="nav-link" active-class="active">Data Manage</RouterLink>
                     </li>
                     <li class="nav-item">
                         <a href="https://github.com/ycy-0510/frc8020-punch" class="nav-link" target="_blank">Open Source</a>

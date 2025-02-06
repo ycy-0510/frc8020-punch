@@ -12,10 +12,6 @@ const realName = reactive({})
 const user = reactive([])
 
 const allUsersDate = ref([])
-// [
-//     '20250103',
-//     '20250104',
-// ]
 
 const newDate = ref('')
 const addDate = () => {
@@ -40,30 +36,9 @@ const addDate = () => {
     }
 }
 
-// {
-//     'userNume': {
-//         "20250125":{
-//             "in" : "08:00",
-//             "out" : "17:00"
-//         },
-//         "20250126":{
-//             "in" : "08:00",
-//             "out" : null
-//         }
-//     }
-// }
-
-//durationData (hours worked)
-// {
-//     'userName':  1
-//     'userName':  2
-// }
-
 onMounted(() => {
-    //set newDate to today
     const today = new Date()
     newDate.value = today.toISOString().split('T')[0]
-    //get data from local storage
     const localDataP = localStorage.getItem('data')
     if (localDataP) {
         punchData.value = JSON.parse(localDataP)
@@ -71,7 +46,6 @@ onMounted(() => {
     console.log(punchData.value)
     const localData = localStorage.getItem('realName')
     if (localData) {
-        //set realName
         const tempData = JSON.parse(localData)
         for (const [key, value] of Object.entries(tempData)) {
             realName[key] = value
@@ -81,11 +55,9 @@ onMounted(() => {
             realName[key] = key
         }
     }
-    //set usernames
     for (const [key, value] of Object.entries(realName)) {
         user.push(key)
     }
-    //sort by realName
     user.sort((a, b) => {
         return realName[a].localeCompare(realName[b])
     })
@@ -154,7 +126,7 @@ const addDatetoAll = () => {
     if (newDate.value) {
         const date = new Date(newDate.value)
         const dateKey = date.toISOString().split('T')[0].replace(/-/g, '')
-        if(!allUsersDate.value.includes(dateKey)){
+        if (!allUsersDate.value.includes(dateKey)) {
             allUsersDate.value.push(dateKey)
             allUsersDate.value.sort()
         } else {
@@ -218,7 +190,32 @@ const saveAlltoAll = () => {
         icon: 'success',
         title: 'Saved',
         text: `Added ${addCount} and deleted ${deleteCount} dates`,
+        showConfirmButton: false,
+        timer: 1500
     })
+}
+
+const exportToXLSX = () => {
+    const wb = XLSX.utils.book_new();
+    if (selectedUser.value === 'all') {
+        for (const [username, data] of Object.entries(punchData.value)) {
+            const wsData = [['Date', 'In', 'Out']];
+            for (const [date, times] of Object.entries(data)) {
+                wsData.push([date, times.in, times.out]);
+            }
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, realName[username] || username);
+        }
+    } else {
+        const wsData = [['Date', 'In', 'Out']];
+        for (const [date, times] of Object.entries(punchData.value[selectedUser.value])) {
+            wsData.push([date, times.in, times.out]);
+        }
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, realName[selectedUser.value] || selectedUser.value);
+    }
+    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    XLSX.writeFile(wb, 'punchin-by-name-' + date + '.xlsx');
 }
 </script>
 
@@ -227,7 +224,7 @@ const saveAlltoAll = () => {
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-9 pt-4">
-                <h2>Edit</h2>
+                <h2>Edit By Name</h2>
                 <div class="form-group py-3">
                     <label for="username">Select Username:</label>
                     <select id="username" v-model="selectedUser" class="form-control" @change="getAllUsersDate">
@@ -239,7 +236,6 @@ const saveAlltoAll = () => {
                     </select>
                 </div>
                 <div v-if="selectedUser != '' && selectedUser != 'all'">
-                    <!-- add date  -->
                     <div class="form-group py-3">
                         <label for="newDate">Add Date:</label>
                         <input type="date" id="newDate" v-model="newDate" class="form-control" />
@@ -264,10 +260,16 @@ const saveAlltoAll = () => {
                             </tr>
                         </tbody>
                     </table>
-                    <button class="btn btn-primary my-3" @click="saveAll">Save All</button>
+                    <div class="row justify-content-between">
+                        <div class="col text-start">
+                            <button class="btn btn-primary my-3" @click="saveAll">Save All</button>
+                        </div>
+                        <div class="col text-end">
+                            <button class="btn btn-success my-3" @click="exportToXLSX">Export</button>
+                        </div>
+                    </div>
                 </div>
                 <div v-else-if="selectedUser == 'all'">
-                    <!-- add date  -->
                     <div class="form-group py-3">
                         <label for="newDate">Add Date:</label>
                         <input type="date" id="newDate" v-model="newDate" class="form-control" />
@@ -287,7 +289,14 @@ const saveAlltoAll = () => {
                             </tr>
                         </tbody>
                     </table>
-                    <button class="btn btn-primary my-3" @click="saveAlltoAll">Save All</button>
+                    <div class="row justify-content-between">
+                        <div class="col text-start">
+                            <button class="btn btn-primary my-3" @click="saveAlltoAll">Save All</button>
+                        </div>
+                        <div class="col text-end">
+                            <button class="btn btn-success my-3" @click="exportToXLSX">Export</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

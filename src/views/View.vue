@@ -188,7 +188,7 @@ const handleTitleClick = () => clickCount.value++;
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-9 pt-4">
-                <h2><a @click="handleTitleClick" href='#' class="text-dark text-decoration-none"> View</a></h2>
+                <h2><a @click="handleTitleClick" href='#' class="text-dark text-decoration-none">Dashboard</a></h2>
                 <div class="card mb-3" v-if="clickCount == 5">
                     <div class="card-body">
                         <div class="form-group">
@@ -246,7 +246,7 @@ const handleTitleClick = () => clickCount.value++;
                         </tr>
                     </tbody>
                 </table>
-                <button class="btn btn-primary my-3" @click="exportXlsx">Export</button>
+                <button class="btn btn-success my-3" @click="exportXlsx">Export</button>
             </div>
         </div>
     </div>
