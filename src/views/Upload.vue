@@ -68,8 +68,19 @@ const handleUpload = (event) => {
                         console.log(row);
                         if (row.length > 0 && row[0] && row[1] && row[2]) {
                             // Convert the date string in column A to a Date object and adjust to UTC+8
-                            if (row[0]) {
+                            //is string
+                            if (row[0] && typeof row[0] === 'string') {
                                 let date = new Date(row[0]);
+                                // Adjust to UTC+8
+                                date.setHours(date.getHours() + 8);
+                                row[0] = date;
+                            }
+                            //is timestamp number
+                            if (row[0] && typeof row[0] === 'number') {
+                                //row[0] my like 45681.875 to 2025-01-24T21:00:00.000Z
+                                //what is 45681.875? 45681 days since 1900-01-01
+                                //how to convert to date? 1900-01-01 + 45681 days + 0.875*24 hours
+                                let date = new Date((row[0] - 2) * 24 * 60 * 60 * 1000 + new Date(1900, 0, 1).getTime());
                                 // Adjust to UTC+8
                                 date.setHours(date.getHours() + 8);
                                 row[0] = date;
@@ -80,8 +91,8 @@ const handleUpload = (event) => {
                             //if B column is out, set out time
                             //if B column is null, do nothing
                             //date is row[0] iso date
-                            if(row[2]){
-                                if(userNameReplace.value[row[2]]){
+                            if (row[2]) {
+                                if (userNameReplace.value[row[2]]) {
                                     row[2] = userNameReplace.value[row[2]]
                                 }
                             }
