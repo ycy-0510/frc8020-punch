@@ -70,6 +70,19 @@ const saveData = () => {
 }
 
 const saveAll = () => {
+    //check if data is edited, and set inedited and outedited
+    for (const [date, times] of Object.entries(editingdata.value[selectedUser.value])) {
+        //if date is not in original data, skip
+        if(!punchData.value[selectedUser.value][date]){
+            continue
+        }
+        if (times.in !== punchData.value[selectedUser.value][date].in && times.in) {
+            times.inedited = true;
+        }
+        if (times.out !== punchData.value[selectedUser.value][date].out && times.out) {
+            times.outedited = true;
+        }
+    }
     const editedData = editingdata.value[selectedUser.value];
     punchData.value[selectedUser.value] = editedData;
     saveData();
@@ -199,17 +212,17 @@ const exportToXLSX = () => {
     const wb = XLSX.utils.book_new();
     if (selectedUser.value === 'all') {
         for (const [username, data] of Object.entries(punchData.value)) {
-            const wsData = [['Date', 'In', 'Out']];
+            const wsData = [['Date', 'In', 'Out', 'I=', 'O=']];
             for (const [date, times] of Object.entries(data)) {
-                wsData.push([date, times.in, times.out]);
+                wsData.push([date, times.in, times.out, times.inedited ? '=' : '', times.outedited ? '=' : '']);
             }
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             XLSX.utils.book_append_sheet(wb, ws, realName[username] || username);
         }
     } else {
-        const wsData = [['Date', 'In', 'Out']];
+        const wsData = [['Date', 'In', 'Out', 'I=', 'O=']];
         for (const [date, times] of Object.entries(punchData.value[selectedUser.value])) {
-            wsData.push([date, times.in, times.out]);
+            wsData.push([date, times.in, times.out, times.inedited ? '=' : '', times.outedited ? '=' : '']);
         }
         const ws = XLSX.utils.aoa_to_sheet(wsData);
         XLSX.utils.book_append_sheet(wb, ws, realName[selectedUser.value] || selectedUser.value);
@@ -254,8 +267,10 @@ const exportToXLSX = () => {
                             <tr v-for="(value, key) in editingdata[selectedUser]" :key="key"
                                 :class="{ 'table-warning': (!value.in || !value.out) && !(!value.in && !value.out), 'table-secondary': !value.in && !value.out, }">
                                 <td>{{ key }}</td>
-                                <td><input type="time" v-model="value.in" class="form-control" /></td>
-                                <td><input type="time" v-model="value.out" class="form-control" /></td>
+                                <td><input type="time" v-model="value.in" class="form-control"
+                                        :class="{ 'bg-info-subtle': value.inedited }" /></td>
+                                <td><input type="time" v-model="value.out" class="form-control"
+                                        :class="{ 'bg-info-subtle': value.outedited }" /></td>
                                 <td><button class="btn btn-danger" @click="removeData(key)">Clear</button></td>
                             </tr>
                         </tbody>

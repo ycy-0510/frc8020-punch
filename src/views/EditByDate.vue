@@ -53,9 +53,20 @@ const saveAllByDate = () => {
         if (!punchData.value[username]) {
             punchData.value[username] = {};
         }
+        const originalData = punchData.value[username][selectedDate.value] || {};
+        //check in data changed
+        if (originalData.in !== timeData.in && timeData.in) {
+            timeData.inedited = true;
+        }
+        //check out data changed
+        if (originalData.out !== timeData.out && timeData.out) {
+            timeData.outedited = true;
+        }
         punchData.value[username][selectedDate.value] = timeData;
     }
     localStorage.setItem('data', JSON.stringify(punchData.value));
+    //copy data to editingDataByDate
+    getUsersByDate();
     Swal.fire({
         icon: 'success',
         title: 'Saved',
@@ -68,19 +79,19 @@ const exportToXLSX = () => {
     const wb = XLSX.utils.book_new();
     if (selectedDate.value === 'all') {
         for (const date of allDates.value) {
-            const wsData = [['Username', 'In', 'Out']];
+            const wsData = [['Username', 'In', 'Out', 'I=', 'O=']];
             for (const [username, userData] of Object.entries(punchData.value)) {
                 if (userData[date]) {
-                    wsData.push([realName[username] || username, userData[date].in, userData[date].out]);
+                    wsData.push([realName[username] || username, userData[date].in, userData[date].out, userData[date].inedited ? '=' : '', userData[date].outedited ? '=' : '']);
                 }
             }
             const ws = XLSX.utils.aoa_to_sheet(wsData);
             XLSX.utils.book_append_sheet(wb, ws, date);
         }
     } else {
-        const wsData = [['Username', 'In', 'Out']];
+        const wsData = [['Username', 'In', 'Out', 'I=', 'O=']];
         for (const [username, timeData] of Object.entries(editingDataByDate)) {
-            wsData.push([realName[username] || username, timeData.in, timeData.out]);
+            wsData.push([realName[username] || username, timeData.in, timeData.out, timeData.inedited ? '=' : '', timeData.outedited ? '=' : '']);
         }
         const ws = XLSX.utils.aoa_to_sheet(wsData);
         XLSX.utils.book_append_sheet(wb, ws, selectedDate.value);
@@ -118,8 +129,10 @@ const exportToXLSX = () => {
                         <tbody>
                             <tr v-for="(value, username) in editingDataByDate" :key="username">
                                 <td>{{ realName[username] }} ({{ username }})</td>
-                                <td><input type="time" v-model="value.in" class="form-control" /></td>
-                                <td><input type="time" v-model="value.out" class="form-control" /></td>
+                                <td><input type="time" v-model="value.in" class="form-control"
+                                        :class="{ 'bg-info-subtle': value.inedited }" /></td>
+                                <td><input type="time" v-model="value.out" class="form-control"
+                                        :class="{ 'bg-info-subtle': value.outedited }" /></td>
                             </tr>
                         </tbody>
                     </table>

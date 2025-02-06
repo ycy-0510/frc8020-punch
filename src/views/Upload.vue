@@ -13,7 +13,9 @@ const userNameReplace = ref({})
 //     'userNume': {
 //         "20250125":{
 //             "in" : "08:00",
-//             "out" : "17:00"
+//             "out" : "17:00",
+//             "inedited":true,
+//             //"outedited":false (don't need this)
 //         },
 //         "20250126":{
 //             "in" : "08:00",
@@ -69,6 +71,7 @@ const handleUpload = (event) => {
                         if (row.length > 0 && row[0] && row[1] && row[2]) {
                             // Convert the date string in column A to a Date object and adjust to UTC+8
                             //is string
+                            let edited = false;
                             if (row[0] && typeof row[0] === 'string') {
                                 let date = new Date(row[0]);
                                 // Adjust to UTC+8
@@ -77,6 +80,7 @@ const handleUpload = (event) => {
                             }
                             //is timestamp number
                             if (row[0] && typeof row[0] === 'number') {
+                                edited = true;
                                 //row[0] my like 45681.875 to 2025-01-24T21:00:00.000Z
                                 //what is 45681.875? 45681 days since 1900-01-01
                                 //how to convert to date? 1900-01-01 + 45681 days + 0.875*24 hours
@@ -108,9 +112,24 @@ const handleUpload = (event) => {
                                 }
                                 if (!tempData[row[2]][date].in) {
                                     tempData[row[2]][date].in = time
+                                    if(edited){
+                                        tempData[row[2]][date].inedited = edited
+                                    }else{
+                                        //delete edited
+                                        delete tempData[row[2]][date].inedited
+                                    }
                                 } else {
                                     //set to min of the two times
-                                    tempData[row[2]][date].in = time < tempData[row[2]][date].in ? time : tempData[row[2]][date].in
+                                    //tempData[row[2]][date].in = time < tempData[row[2]][date].in ? time : tempData[row[2]][date].in
+                                    if (time <= tempData[row[2]][date].in) {
+                                        tempData[row[2]][date].in = time
+                                        if (edited) {
+                                            tempData[row[2]][date].inedited = edited
+                                        } else {
+                                            //delete edited
+                                            delete tempData[row[2]][date].inedited
+                                        }
+                                    }
                                 }
                                 count += 1;
                             } else if (row[1] === 'Out') {
@@ -123,9 +142,24 @@ const handleUpload = (event) => {
                                 }
                                 if (!tempData[row[2]][date].out) {
                                     tempData[row[2]][date].out = time
+                                    if(edited){
+                                        tempData[row[2]][date].outedited = edited
+                                    }else{
+                                        //delete edited
+                                        delete tempData[row[2]][date].outedited
+                                    }
                                 } else {
                                     //set to max of the two times
-                                    tempData[row[2]][date].out = time > tempData[row[2]][date].out ? time : tempData[row[2]][date].out
+                                    //tempData[row[2]][date].out = time > tempData[row[2]][date].out ? time : tempData[row[2]][date].out
+                                    if (time >= tempData[row[2]][date].out) {
+                                        tempData[row[2]][date].out = time
+                                        if (edited) {
+                                            tempData[row[2]][date].outedited = edited
+                                        } else {
+                                            //delete edited
+                                            delete tempData[row[2]][date].outedited
+                                        }
+                                    }
                                 }
                                 count += 1;
                             }

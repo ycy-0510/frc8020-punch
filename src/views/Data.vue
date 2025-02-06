@@ -232,7 +232,9 @@ const exportPunch = () => {
                 User: realName[user] || user,
                 Date: date,
                 In: times.in,
-                Out: times.out
+                Out: times.out,
+                'I=': times.inedited ? '=' : '',
+                'O=': times.outedited ? '=' : ''
             });
         }
     }
@@ -241,7 +243,7 @@ const exportPunch = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'PunchData');
     const datetime = new Date(new Date().getTime() + 8 * 60 * 60 * 1000).toISOString().slice(0, 19).replace(/[-:]/g, '');
-    XLSX.writeFile(workbook, `PunchData-${datetime}.xlsx`);
+    XLSX.writeFile(workbook, `PunchIn-all-${datetime}.xlsx`);
 };
 
 const shareWithLink = () => {
@@ -267,7 +269,42 @@ const shareWithLink = () => {
             timer: 1500
         });
     }
-} 
+}
+
+const deletAllData = () => {
+    //ask user first by using sweetalert and enter 'DELETE ALL DATA' to confirm
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "To confirm, type 'DELETE ALL DATA'",
+        input: 'text',
+        inputPlaceholder: 'DELETE ALL DATA',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        preConfirm: (inputValue) => {
+            if (inputValue !== 'DELETE ALL DATA') {
+                Swal.showValidationMessage('You need to type "DELETE ALL DATA"');
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            //delete all data
+            localStorage.removeItem('data')
+            localStorage.removeItem('realName')
+            localStorage.removeItem('userNameReplace')
+            Swal.fire({
+                icon: 'success',
+                title: 'Deleted',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                location.reload();
+            })
+        }
+    })
+}
 </script>
 
 <template>
@@ -329,6 +366,15 @@ const shareWithLink = () => {
                                 <h4>Export All Punch Data</h4>
                                 <p>Export all punch data share</p>
                                 <button class="btn btn-primary w-100" @click="exportPunch">Export</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 pb-2">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h4>Delete All Data</h4>
+                                <p>Delete all data from local storage</p>
+                                <button class="btn btn-danger w-100" @click="deletAllData">Delete All Data</button>
                             </div>
                         </div>
                     </div>
