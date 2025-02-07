@@ -9,6 +9,7 @@ const punchData = ref({});
 const editingDataByDate = reactive({});
 const realName = reactive({});
 const allDates = ref([]);
+const users = reactive([]);
 
 onMounted(() => {
     // Get data from local storage
@@ -27,6 +28,21 @@ onMounted(() => {
             realName[key] = key;
         }
     }
+    //fill missing realName
+    for (const [key, value] of Object.entries(punchData.value)) {
+        if (!realName[key]) {
+            realName[key] = key
+        }
+    }
+    //set usernames
+    for (const [key, value] of Object.entries(realName)) {
+        users.push(key);
+    }
+    //sort by realName
+    users.sort((a, b) => {
+        return realName[a].localeCompare(realName[b]);
+    });
+
     // Get all dates
     const datesSet = new Set();
     for (const userData of Object.values(punchData.value)) {
@@ -127,12 +143,12 @@ const exportToXLSX = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(value, username) in editingDataByDate" :key="username">
-                                <td>{{ realName[username] }} ({{ username }})</td>
-                                <td><input type="time" v-model="value.in" class="form-control"
-                                        :class="{ 'bg-info-subtle': value.inedited }" /></td>
-                                <td><input type="time" v-model="value.out" class="form-control"
-                                        :class="{ 'bg-info-subtle': value.outedited }" /></td>
+                            <tr v-for="username in users" :key="username">
+                                <td>{{ realName[username] }}</td>
+                                <td><input type="time" v-model="editingDataByDate[username].in" class="form-control"
+                                        :class="{ 'bg-info-subtle': editingDataByDate[username].inedited }" /></td>
+                                <td><input type="time" v-model="editingDataByDate[username].out" class="form-control"
+                                        :class="{ 'bg-info-subtle': editingDataByDate[username].outedited }" /></td>
                             </tr>
                         </tbody>
                     </table>

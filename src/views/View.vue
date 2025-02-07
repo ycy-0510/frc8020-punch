@@ -70,13 +70,13 @@ onMounted(() => {
                 }
             } else {
                 console.log('missing punch')
-                if(!missingPunchesIn.value[key]){
+                if (!missingPunchesIn.value[key]) {
                     missingPunchesIn.value[key] = 0;
                 }
-                if(!missingPunchesOut.value[key]){
+                if (!missingPunchesOut.value[key]) {
                     missingPunchesOut.value[key] = 0;
                 }
-                if(!missingDay.value[key]){
+                if (!missingDay.value[key]) {
                     missingDay.value[key] = 0;
                 }
                 if (!time.in && !time.out) {
@@ -107,6 +107,12 @@ onMounted(() => {
         }
     } else {
         for (const [key, value] of Object.entries(punchData.value)) {
+            realName[key] = key
+        }
+    }
+    //fill missing realName
+    for (const [key, value] of Object.entries(punchData.value)) {
+        if (!realName[key]) {
             realName[key] = key
         }
     }

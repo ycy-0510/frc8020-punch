@@ -41,6 +41,12 @@ onMounted(() => {
             realName[key] = key
         }
     }
+    //fill missing realName
+    for (const [key, value] of Object.entries(punchData.value)) {
+        if (!realName[key]) {
+            realName[key] = key
+        }
+    }
     console.log(realName.value)
     //set usernames
     for (const [key, value] of Object.entries(realName)) {

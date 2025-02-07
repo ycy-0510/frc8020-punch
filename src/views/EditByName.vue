@@ -55,6 +55,12 @@ onMounted(() => {
             realName[key] = key
         }
     }
+    //fill missing realName
+    for (const [key, value] of Object.entries(punchData.value)) {
+        if (!realName[key]) {
+            realName[key] = key
+        }
+    }
     for (const [key, value] of Object.entries(realName)) {
         user.push(key)
     }
@@ -73,7 +79,7 @@ const saveAll = () => {
     //check if data is edited, and set inedited and outedited
     for (const [date, times] of Object.entries(editingdata.value[selectedUser.value])) {
         //if date is not in original data, skip
-        if(!punchData.value[selectedUser.value][date]){
+        if (!punchData.value[selectedUser.value][date]) {
             continue
         }
         if (times.in !== punchData.value[selectedUser.value][date].in && times.in) {
