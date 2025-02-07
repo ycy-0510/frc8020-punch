@@ -305,6 +305,38 @@ const deletAllData = () => {
         }
     })
 }
+
+const deletAllPunchData = () => {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "To confirm, type 'DELETE ALL PUNCH DATA'",
+        input: 'text',
+        inputPlaceholder: 'DELETE ALL PUNCH DATA',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        preConfirm: (inputValue) => {
+            if (inputValue !== 'DELETE ALL PUNCH DATA') {
+                Swal.showValidationMessage('You need to type "DELETE ALL PUNCH DATA"');
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            //delete all data
+            localStorage.removeItem('data')
+            Swal.fire({
+                icon: 'success',
+                title: 'Deleted',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                location.reload();
+            })
+        }
+    })
+}
 </script>
 
 <template>
@@ -375,6 +407,16 @@ const deletAllData = () => {
                                 <h4>Delete All Data</h4>
                                 <p>Delete all data from local storage</p>
                                 <button class="btn btn-danger w-100" @click="deletAllData">Delete All Data</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 pb-2">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h4>Delete All Punch Data</h4>
+                                <p>Delete all punch data from local storage</p>
+                                <button class="btn btn-danger w-100" @click="deletAllPunchData">Delete All Punch
+                                    Data</button>
                             </div>
                         </div>
                     </div>
