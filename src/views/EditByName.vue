@@ -61,6 +61,12 @@ onMounted(() => {
             realName[key] = key
         }
     }
+    for(const [key, value] of Object.entries(realName)){
+        //if not in punchData, delete it
+        if(!punchData.value[key]){
+            delete realName[key]
+        }
+    }
     for (const [key, value] of Object.entries(realName)) {
         user.push(key)
     }

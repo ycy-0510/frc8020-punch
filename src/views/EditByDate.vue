@@ -35,6 +35,12 @@ onMounted(() => {
         }
     }
     //set usernames
+    for(const [key, value] of Object.entries(realName)){
+        //if not in punchData, delete it
+        if(!punchData.value[key]){
+            delete realName[key]
+        }
+    }
     for (const [key, value] of Object.entries(realName)) {
         users.push(key);
     }
@@ -55,6 +61,9 @@ onMounted(() => {
 
 const getUsersByDate = () => {
     if (!selectedDate.value) return;
+    for(const user of users){
+        editingDataByDate[user] = { in: null, out: null };
+    }
     for (const [username, userData] of Object.entries(punchData.value)) {
         if (userData[selectedDate.value]) {
             editingDataByDate[username] = { ...userData[selectedDate.value] };

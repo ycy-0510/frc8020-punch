@@ -116,6 +116,12 @@ onMounted(() => {
             realName[key] = key
         }
     }
+    for(const [key, value] of Object.entries(realName)){
+        //if not in punchData, delete it
+        if(!punchData.value[key]){
+            delete realName[key]
+        }
+    }
     //set usernames
     for (const [key, value] of Object.entries(realName)) {
         users.push(key)
@@ -245,7 +251,7 @@ const handleTitleClick = () => clickCount.value++;
                         <tr v-for=" user in users" :key="user"
                             :class="{ 'table-danger': durationData[user] / maxHours < compareRate && clickCount == 5 }">
                             <td>{{ realName[user] }}</td>
-                            <td>{{ durationData[user].toFixed(2) }}</td>
+                            <td>{{ (durationData[user]||0).toFixed(2) }}</td>
                             <td>{{ missingPunchesIn[user] ? missingPunchesIn[user] : 0 }}</td>
                             <td>{{ missingPunchesOut[user] ? missingPunchesOut[user] : 0 }}</td>
                             <td>{{ missingDay[user] ? missingDay[user] : 0 }}</td>

@@ -53,6 +53,19 @@ onMounted(async () => {
         userNameReplace.value = JSON.parse(localDataU)
     }
 
+    //fill missing realName
+    for (const [key, value] of Object.entries(punchData.value)) {
+        if (!realName[key]) {
+            realName[key] = key
+        }
+    }
+    //set usernames
+    for (const [key, value] of Object.entries(realName)) {
+        //if not in punchData, delete it
+        if (!punchData.value[key]) {
+            delete realName[key]
+        }
+    }
     //set usernames
     for (const [key, value] of Object.entries(realName)) {
         users.push(key)
