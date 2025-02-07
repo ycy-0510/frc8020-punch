@@ -13,5 +13,5 @@ status = 200
 to = "/index.html"
 
 [[edge_functions]]
-path = "/.netlify/functions/dropbox-proxy"
+path = "/.functions/dropbox-proxy"
 function = "fetch-dropbox-data"

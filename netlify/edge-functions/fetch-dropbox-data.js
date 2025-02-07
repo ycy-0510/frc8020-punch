@@ -1,30 +1,19 @@
 export default async (request) => {
     const url = new URL(request.url);
     const partoflink = url.searchParams.get("file"); // ?file=<dropbox-file-url>
-    const filePath = `https://dl.dropbox.com/scl/fi/${partoflink.replace("//q", "?").replace("//a", "&")}&dl=1`;
-    if (!filePath) {
+    if (!partoflink) {
         return new Response("Missing file parameter", { status: 400 });
     }
-
+    const filePath = `https://dl.dropbox.com/scl/fi/${partoflink.replace("//q", "?").replace("//a", "&")}&dl=1`;
+    console.log(filePath);
     try {
-        // Step 1: HEAD request to check file size
-        const headResponse = await fetch(filePath, { method: "HEAD" });
-        const contentLength = headResponse.headers.get("Content-Length");
-
-        if (!contentLength) {
-            return new Response("Unable to determine file size", { status: 400 });
-        }
-
-        const fileSize = parseInt(contentLength, 10);
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-
-        if (fileSize > MAX_SIZE) {
-            return new Response("File size exceeds 5MB limit", { status: 413 });
-        }
-
-        // Step 2: Fetch and proxy the file
         const dropboxResponse = await fetch(filePath);
+        const contentLength = dropboxResponse.headers.get("Content-Length");
+        const maxFileSize = 5 * 1024 * 1024; // 5 MB
 
+        if (contentLength && parseInt(contentLength) > maxFileSize) {
+            return new Response("File size exceeds 5 MB limit", { status: 413 });
+        }
         return new Response(dropboxResponse.body, {
             headers: {
                 "Access-Control-Allow-Origin": "*",
